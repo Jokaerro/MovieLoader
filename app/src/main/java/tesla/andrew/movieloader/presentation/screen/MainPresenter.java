@@ -38,7 +38,12 @@ public class MainPresenter extends BasePresenter<MainView> {
     }
 
     public void updateDownloadState(int state) {
-
+        if(state < 100)
+            mView.updateProgressState(state);
+        else {
+            mView.hideDownloadDialog();
+            mView.makeMessage("Download complete");
+        }
     }
 
     @Override
