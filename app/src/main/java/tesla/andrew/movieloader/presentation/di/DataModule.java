@@ -4,8 +4,6 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import tesla.andrew.movieloader.data.api.RestApi;
-import tesla.andrew.movieloader.data.api.RestApiCreator;
 import tesla.andrew.movieloader.data.datasource.DataSourceImpl;
 import tesla.andrew.movieloader.presentation.application.Config;
 
@@ -14,12 +12,6 @@ import tesla.andrew.movieloader.presentation.application.Config;
  */
 @Module
 public class DataModule {
-    @Provides
-    @Singleton
-    RestApi provideRestApi() {
-        return RestApiCreator.create(Config.API_BASE_URL);
-    }
-
     @Provides
     @Singleton
     DataSourceImpl provideDataSource() {

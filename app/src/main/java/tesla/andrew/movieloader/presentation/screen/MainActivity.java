@@ -30,11 +30,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     @OnClick(R.id.start_download)
     void onStartDownloadClick() {
+        startButton.setEnabled(false);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST);
+            startButton.setEnabled(true);
         } else {
             mPresenter.startDownloadFile();
         }
@@ -68,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     @Override
     public void makeMessage(String message) {
+        startButton.setEnabled(true);
+        hideDownloadDialog();
         Snackbar.make(startButton, message, Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
     }
@@ -76,10 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     @Override
     public void updateProgressState(int state) {
         if(mProgressDialog != null) {
-            if(state > 0)
-                mProgressDialog.setProgress(state);
-            else
-                mProgressDialog.hide();
+            mProgressDialog.setProgress(state);
         } else {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setTitle("Loading");
