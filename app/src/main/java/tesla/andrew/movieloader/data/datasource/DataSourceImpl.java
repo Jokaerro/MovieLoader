@@ -6,7 +6,10 @@ import org.reactivestreams.Subscription;
 import android.os.Environment;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.inject.Inject;
 
@@ -18,36 +21,73 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ForwardingSource;
 import okio.Okio;
 import retrofit2.Response;
+import tesla.andrew.movieloader.data.api.DownloadProgressListener;
 import tesla.andrew.movieloader.data.api.RestApi;
+import tesla.andrew.movieloader.data.api.RestApiCreator;
 import tesla.andrew.movieloader.data.entity.DownloadProgress;
 import tesla.andrew.movieloader.presentation.application.App;
+import tesla.andrew.movieloader.presentation.application.Config;
 
 /**
  * Created by TESLA on 28.07.2017.
  */
 
 public class DataSourceImpl implements DataSource {
-    @Inject
-    public RestApi restApi;
-
     public DataSourceImpl() {
         App.getAppComponent().injectDatSource(this);
     }
 
+    public void download(String fileName, final File file, Subscriber subscriber, DownloadProgressListener listener) {
+        RestApiCreator.create(Config.API_BASE_URL)
+                .create(RestApi.class)
+                .downloadFile2(fileName)
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .map(new Function<ResponseBody, InputStream>() {
+                    @Override
+                    public InputStream apply(@NonNull ResponseBody responseBody) throws Exception {
+                        return responseBody.byteStream();
+                    }
+                })
+                .observeOn(Schedulers.computation())
+                .doOnNext(new Consumer<InputStream>() {
+                    @Override
+                    public void accept(@NonNull InputStream inputStream) throws Exception {
+                        try {
+                            OutputStream out = null;
+                            out = new FileOutputStream(file);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while((len=inputStream.read(buf))>0){
+                                out.write(buf,0,len);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((Observer<? super Object>) subscriber);
+    }
+
     @Override
     public Flowable<Response<ResponseBody>> downloadFile(String fileName) {
-        return restApi.downloadFile(fileName);
+        return null;
     }
 //    @Override
 //    public Flowable<DownloadProgress<File>> downloadFile(final String fileName) {

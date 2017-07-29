@@ -8,6 +8,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Streaming;
 import tesla.andrew.movieloader.data.entity.DownloadProgress;
 
 /**
@@ -16,8 +17,15 @@ import tesla.andrew.movieloader.data.entity.DownloadProgress;
 
 //http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_5mb.mp4
 public interface RestApi {
+    @Streaming
     @GET("video/mp4/720/{file}")
     Flowable<Response<ResponseBody>> downloadFile(@Path("file") String fileName);
+
+    @Streaming
+    @GET("video/mp4/720/{file}")
+    Observable<ResponseBody> downloadFile2(@Path("file") String fileName);
+
+
 
     //Observable<retrofit2.Response<ResponseBody>> downloadFile(@Path("file") String fileName);
 }

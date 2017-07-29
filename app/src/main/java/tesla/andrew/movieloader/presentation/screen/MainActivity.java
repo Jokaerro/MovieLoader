@@ -1,5 +1,9 @@
 package tesla.andrew.movieloader.presentation.screen;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
@@ -16,6 +20,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tesla.andrew.movieloader.R;
+import tesla.andrew.movieloader.data.api.DownloadProgressListener;
+import tesla.andrew.movieloader.data.entity.Download;
 import tesla.andrew.movieloader.presentation.application.App;
 
 public class MainActivity extends AppCompatActivity implements MainView {
@@ -72,14 +78,28 @@ public class MainActivity extends AppCompatActivity implements MainView {
                 .setAction("Action", null).show();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
 
     @Override
     public void updateProgressState(int state) {
         if(mProgressDialog != null) {
-            if(state > 0)
+            mProgressDialog.show();
+            if(state < 100)
                 mProgressDialog.setProgress(state);
-            else
+            else {
                 mProgressDialog.hide();
+            }
         } else {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setTitle("Loading");
@@ -97,5 +117,12 @@ public class MainActivity extends AppCompatActivity implements MainView {
         if(mProgressDialog != null) {
             mProgressDialog.hide();
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Download download) {
+        updateProgressState(download.getProgress());
+        if(download.getProgress() > 99)
+            makeMessage("Download complete");
     }
 }

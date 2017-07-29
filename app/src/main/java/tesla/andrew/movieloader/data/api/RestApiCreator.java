@@ -14,14 +14,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class RestApiCreator {
-    public static RestApi create(String apiBaseUrl) {
+    public static Retrofit create(String apiBaseUrl) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(apiBaseUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(buildOkHttpClient())
                 .build();
 
-            return retrofit.create(RestApi.class);
+            return retrofit;
     }
 
     private static OkHttpClient buildOkHttpClient() {

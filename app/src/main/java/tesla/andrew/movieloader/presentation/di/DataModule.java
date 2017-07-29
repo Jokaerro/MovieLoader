@@ -16,12 +16,6 @@ import tesla.andrew.movieloader.presentation.application.Config;
 public class DataModule {
     @Provides
     @Singleton
-    RestApi provideRestApi() {
-        return RestApiCreator.create(Config.API_BASE_URL);
-    }
-
-    @Provides
-    @Singleton
     DataSourceImpl provideDataSource() {
         return new DataSourceImpl();
     }
