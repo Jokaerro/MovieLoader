@@ -13,5 +13,5 @@ import tesla.andrew.movieloader.data.entity.DownloadProgress;
  */
 
 public interface DataSource {
-    Flowable<Response<ResponseBody>> downloadFile(String fileName);
+    Flowable<DownloadProgress<File>> downloadFile(String fileName);
 }

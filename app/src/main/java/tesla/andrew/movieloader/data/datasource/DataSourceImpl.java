@@ -46,8 +46,39 @@ public class DataSourceImpl implements DataSource {
     }
 
     @Override
-    public Flowable<Response<ResponseBody>> downloadFile(String fileName) {
-        return restApi.downloadFile(fileName);
+    public Flowable<DownloadProgress<File>> downloadFile(String fileName) {
+        return restApi.downloadFile(fileName)
+                .switchMap(responseBodyResponse -> Flowable.create(emitter -> {
+                    ResponseBody body = responseBodyResponse.body();
+                    final long contentLength = body.contentLength();
+
+                    ForwardingSource forwardingSource = new ForwardingSource(body.source()) {
+                        private long totalBytesRead = 0L;
+
+                        @Override
+                        public long read(Buffer sink, long byteCount) throws IOException {
+                            long bytesRead = super.read(sink, byteCount);
+                            totalBytesRead += bytesRead != -1 ? bytesRead : 0;
+                            boolean done = bytesRead == -1;
+                            float progress = done ? 1f : (float) bytesRead / contentLength;
+                            emitter.onNext(new DownloadProgress<>(progress));
+
+                            return bytesRead;
+                        }
+                    };
+                    emitter.setCancellable(body::close);
+                    try {
+                        File saveLocation = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getAbsoluteFile(), fileName);
+                        saveLocation.getParentFile().mkdirs();
+                        BufferedSink sink = Okio.buffer(Okio.sink(saveLocation));
+                        sink.writeAll(forwardingSource);
+                        sink.close();
+                        emitter.onNext(new DownloadProgress<>(saveLocation));
+                        emitter.onComplete();
+                    } catch (IOException e) {
+                        emitter.onError(e);
+                    }
+                }, BackpressureStrategy.LATEST));
     }
 //    @Override
 //    public Flowable<DownloadProgress<File>> downloadFile(final String fileName) {
