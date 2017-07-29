@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements MainView {
     @Override
     public void hideDownloadDialog() {
         if(mProgressDialog != null) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 }

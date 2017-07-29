@@ -52,8 +52,7 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(fileDownloadProgress -> {
                     float progress = fileDownloadProgress.getProgress();
-                    Log.e("", ">>>" + (int)progress);
-                    updateDownloadState((int)(progress * 1000));
+                    updateDownloadState((int)(progress * 100));
                 })
                 .filter(DownloadProgress::isDone)
                 .map(DownloadProgress::getData)
