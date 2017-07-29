@@ -1,6 +1,7 @@
 package tesla.andrew.movieloader.presentation.screen;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,9 +46,11 @@ public class MainPresenter extends BasePresenter<MainView> {
     public void startDownloadFile() {
         final String fileName = "big_buck_bunny_720p_5mb.mp4";
         mDataSource.downloadFile(fileName)
-                .observeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(fileDownloadProgress -> {
                     float progress = fileDownloadProgress.getProgress();
+                    Log.e("", ">>>" + progress);
                     updateDownloadState((int)progress * 100);
                 })
                 .filter(DownloadProgress::isDone)

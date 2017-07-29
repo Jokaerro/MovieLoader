@@ -62,7 +62,6 @@ public class DataSourceImpl implements DataSource {
                             boolean done = bytesRead == -1;
                             float progress = done ? 1f : (float) bytesRead / contentLength;
                             emitter.onNext(new DownloadProgress<>(progress));
-
                             return bytesRead;
                         }
                     };
@@ -80,99 +79,4 @@ public class DataSourceImpl implements DataSource {
                     }
                 }, BackpressureStrategy.LATEST));
     }
-//    @Override
-//    public Flowable<DownloadProgress<File>> downloadFile(final String fileName) {
-//        return restApi.downloadFile(fileName)
-//                .switchMap(new Function<Response, Flowable<DownloadProgress<File>>>() {
-//                    @Override
-//                    public Flowable<DownloadProgress<File>> apply(@NonNull final Response response) throws Exception {
-//                        return Flowable.create(new FlowableOnSubscribe<DownloadProgress<File>>() {
-//                            @Override
-//                            public void subscribe(final FlowableEmitter<DownloadProgress<File>> emitter) {
-//                            final ResponseBody body = response.raw().body();
-//                            final long contentLength = body.contentLength();
-//                            ForwardingSource forwardingSource = new ForwardingSource(body.source()) {
-//                                private long totalBytesRead = 0L;
-//
-//                                @Override
-//                                public long read(Buffer sink, long byteCount) throws IOException {
-//                                    long bytesRead = super.read(sink, byteCount);
-//                                    totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-//                                    boolean done = bytesRead == -1;
-//                                    float progress = done ? 1f : (float) bytesRead / contentLength;
-//                                    emitter.onNext(new DownloadProgress<File>(progress));
-//                                    return bytesRead;
-//                                }
-//                            };
-//                            emitter.setCancellable(new Cancellable() {
-//                                @Override
-//                                public void cancel() throws Exception {
-//                                    body.close();
-//                                }
-//                            });
-//                            try {
-//                                File saveLocation = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsoluteFile(), fileName);
-//                                saveLocation.getParentFile().mkdirs();
-//                                BufferedSink sink = Okio.buffer(Okio.sink(saveLocation));
-//                                sink.writeAll(forwardingSource);
-//                                sink.close();
-//                                emitter.onNext(new DownloadProgress<>(saveLocation));
-//                                emitter.onComplete();
-//                            } catch (IOException e) {
-//                                emitter.onError(e);
-//                            }}
-//                        }, BackpressureStrategy.LATEST);
-//                    }
-//                });
-//    }
-
-
-//    private final SimpleEventBus eventBus;
-//
-//    @Override
-//    public Observable<File> downloadFile(final String fileName, final Subscriber<ProgressEvent> observeProgress) {
-//
-//        final Subscription progressSubscription = eventBus.filteredObservable(ProgressEvent.class)
-//                .subscribe(new Subscriber<ProgressEvent>() {
-//                    @Override
-//                    public void onComplete() {
-//                        observeProgress.onComplete();
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        observeProgress.onError(e);
-//                    }
-//
-//                    @Override
-//                    public void onSubscribe(Subscription s) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(ProgressEvent progressEvent) {
-//                        // We check if this event contains our identifier
-//                        if(progressEvent.getDownloadIdentifier().equals(fileName)) {
-//                            observeProgress.onNext(progressEvent); // notify listener
-//                        }
-//                    }
-//                });
-//
-//        return restApi.downloadFile(fileName)
-//                .flatMap(new Function<Response<ResponseBody>, Observable<File>>() {
-//                    @Override
-//                    public Observable<File> apply(@NonNull Response<ResponseBody> response) throws Exception {
-//                        try {
-//                            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsoluteFile(), fileName);
-//                            BufferedSink sink = Okio.buffer(Okio.sink(file));
-//                            sink.writeAll(response.body().source());
-//                            sink.close();
-//
-//                            return Observable.just(file);
-//                        } catch (IOException e) {
-//                            return Observable.error(e);
-//                        }
-//                    }
-//                });
-//    }
 }
