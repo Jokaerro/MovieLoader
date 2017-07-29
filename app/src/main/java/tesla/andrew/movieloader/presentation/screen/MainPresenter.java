@@ -8,23 +8,8 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Cancellable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.ForwardingSource;
-import okio.Okio;
-import retrofit2.Response;
 import tesla.andrew.movieloader.data.datasource.DataSourceImpl;
 import tesla.andrew.movieloader.data.entity.DownloadProgress;
 import tesla.andrew.movieloader.presentation.application.App;
@@ -52,7 +37,6 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(fileDownloadProgress -> {
                     float progress = fileDownloadProgress.getProgress();
-                    Log.e("", ">>>" + (int)progress);
                     updateDownloadState((int)(progress * 1000));
                 })
                 .filter(DownloadProgress::isDone)
